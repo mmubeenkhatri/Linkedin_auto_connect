@@ -1,3 +1,4 @@
+import pandas as pd
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -26,8 +27,8 @@ def linkedin_login():
     WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, 'username'))).send_keys(username)
     driver.find_element(By.ID, 'password').send_keys(password)
     driver.find_element(By.ID, 'password').send_keys(Keys.RETURN)
-    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//div[contains(@class, 'feed-identity-module')]")))
-
+    WebDriverWait(driver, 1000).until(EC.presence_of_element_located((By.XPATH, "//div[contains(@class, 'feed-identity-module')]")))
+    time.sleep(5)
 # Function to send a connection request
 def send_connection_request(profile_url):
     driver.get(profile_url)
@@ -52,22 +53,22 @@ def send_connection_request(profile_url):
     except Exception as e:
         print(f"Failed to send connection request to {profile_url}: {e}")
 
+# Read LinkedIn profile URLs from CSV
+def read_profiles_from_csv(csv_file):
+    df = pd.read_csv(csv_file)
+    return df['profile_url'].tolist()
+
 # Log into LinkedIn
 linkedin_login()
 
 # List of LinkedIn profile URLs to send connection requests to
-profiles = [
-    'https://www.linkedin.com/in/imtiaz-hussain-40a552263/',
-    'https://www.linkedin.com/in/muhammad-faizan-jamshaid-a21591241/',
-    'https://www.linkedin.com/in/adiba-abid-2658b9199/',
-    'https://www.linkedin.com/in/ghulamrasool1/',
-    # Add more profiles as needed
-]
+profiles = read_profiles_from_csv('profiles.csv')
 
 # Send connection requests
 for profile in profiles:
     send_connection_request(profile)
     time.sleep(5)  # Add delay to avoid being flagged as a bot
+
 
 # Close the driver
 driver.quit()
